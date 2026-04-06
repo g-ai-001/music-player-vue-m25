@@ -256,7 +256,7 @@ const isLoading = ref(true);
 // 加载歌曲数据
 async function loadSongs() {
   try {
-    const response = await fetch('/music/songs.json');
+    const response = await fetch('./music/songs.json');
     if (!response.ok) throw new Error('Failed to load songs.json');
 
     const songs: Music[] = await response.json();
@@ -264,7 +264,7 @@ async function loadSongs() {
     // 检查并处理封面和歌词路径
     for (const song of songs) {
       // 如果封面路径是相对路径，尝试加载，如果失败则使用备用封面
-      if (song.cover && song.cover.startsWith('/')) {
+      if (song.cover && song.cover.startsWith('./')) {
         try {
           const img = new Image();
           await new Promise((resolve, reject) => {
@@ -279,7 +279,7 @@ async function loadSongs() {
       }
 
       // 如果歌词路径是相对路径，尝试加载
-      if (song.lyrics && song.lyrics.startsWith('/')) {
+      if (song.lyrics && song.lyrics.startsWith('./')) {
         try {
           const response = await fetch(song.lyrics);
           if (response.ok) {
