@@ -62,11 +62,12 @@ body {
   bottom: 0;
   background: linear-gradient(
     135deg,
-    rgba(0, 0, 0, 0.7) 0%,
-    rgba(0, 0, 0, 0.5) 50%,
-    rgba(0, 0, 0, 0.7) 100%
+    rgba(0, 0, 0, 0.75) 0%,
+    rgba(0, 0, 0, 0.55) 50%,
+    rgba(0, 0, 0,  0.75) 100%
   );
   backdrop-filter: blur(50px);
+  -webkit-backdrop-filter: blur(50px);
 }
 
 .main-container {
@@ -78,9 +79,57 @@ body {
   overflow: hidden;
 }
 
+/* 笔记本电脑适配 */
+@media (max-width: 1366px) and (max-height: 900px) {
+  .main-container {
+    height: 100%;
+  }
+}
+
+/* 平板设备 */
+@media (max-width: 1024px) {
+  .background-overlay {
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+  }
+}
+
+/* 手机设备 */
 @media (max-width: 768px) {
   .main-container {
     flex-direction: column;
+  }
+
+  .background-overlay {
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+  }
+}
+
+/* 小屏手机 */
+@media (max-width: 480px) {
+  .background-overlay {
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+  }
+}
+
+/* 折叠屏设备适配 */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .main-container {
+    flex-direction: row;
+  }
+}
+
+/* 横屏手机适配 */
+@media (max-width: 768px) and (orientation: landscape) {
+  .main-container {
+    flex-direction: row;
+  }
+
+  .background-overlay {
+    backdrop-filter: blur(35px);
+    -webkit-backdrop-filter: blur(35px);
   }
 }
 </style>

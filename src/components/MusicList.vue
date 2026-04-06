@@ -43,6 +43,7 @@ function handleSelect(index: number) {
   height: 100%;
   background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
@@ -181,6 +182,23 @@ function handleSelect(index: number) {
   margin-left: 10px;
 }
 
+/* 平板适配 */
+@media (max-width: 1024px) {
+  .music-list {
+    width: 280px;
+  }
+
+  .music-cover {
+    width: 44px;
+    height: 44px;
+  }
+
+  .music-title {
+    font-size: 13px;
+  }
+}
+
+/* 手机适配 */
 @media (max-width: 768px) {
   .music-list {
     width: 100%;
@@ -188,6 +206,11 @@ function handleSelect(index: number) {
     max-height: 35vh;
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .list-title {
+    padding: 15px;
+    font-size: 16px;
   }
 
   .list-container {
@@ -218,6 +241,46 @@ function handleSelect(index: number) {
 
   .music-duration {
     display: none;
+  }
+}
+
+/* 横屏手机适配 */
+@media (max-width: 768px) and (orientation: landscape) {
+  .music-list {
+    max-height: 50vh;
+  }
+
+  .list-container {
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
+    flex-wrap: nowrap;
+  }
+
+  .music-item {
+    flex-direction: row;
+    min-width: unset;
+  }
+
+  .music-cover {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+/* 小屏手机 */
+@media (max-width: 480px) {
+  .music-list {
+    max-height: 40vh;
+  }
+
+  .music-item {
+    min-width: 100px;
+  }
+
+  .music-cover {
+    width: 60px;
+    height: 60px;
   }
 }
 </style>

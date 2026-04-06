@@ -13,11 +13,14 @@
         {{ line.text }}
       </div>
     </div>
+    <div v-if="parsedLyrics.length === 0" class="no-lyrics">
+      暂无歌词
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { usePlayer } from '../composables/usePlayer';
 
 const props = defineProps<{
@@ -31,14 +34,18 @@ const lyricsRef = ref<HTMLElement | null>(null);
 const parsedLyrics = computed(() => parseLyrics(props.lyrics));
 
 const currentLineIndex = computed(() => {
-  for (let i = parsedLyrics.value.length - 1; i >= 0; i--) {
-    if (props.currentTime >= parsedLyrics.value[i].time) {
+  const lyrics = parsedLyrics.value;
+  if (lyrics.length === 0) return -1;
+
+  for (let i = lyrics.length - 1; i >= 0; i--) {
+    if (props.currentTime >= lyrics[i].time) {
       return i;
     }
   }
   return -1;
 });
 
+// 使用 requestAnimationFrame 优化滚动性能
 const offset = computed(() => {
   if (currentLineIndex.value === -1) {
     return 0;
@@ -55,19 +62,22 @@ const offset = computed(() => {
   height: 100%;
   overflow: hidden;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .lyrics-content {
-  transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
 }
 
 .lyric-line {
   height: 55px;
   line-height: 55px;
   text-align: center;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.35);
   font-size: 18px;
-  transition: all 0.3s ease;
+  transition: color 0.3s ease, font-size 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -75,26 +85,60 @@ const offset = computed(() => {
 }
 
 .lyric-line.past {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .lyric-line.active {
   color: #fff;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 600;
-  text-shadow: 0 0 30px rgba(29, 185, 84, 0.6), 0 0 60px rgba(29, 185, 84, 0.3);
-  transform: scale(1.05);
+  text-shadow: 0 0 30px rgba(29, 185, 84, 0.5), 0 0 60px rgba(29, 185, 84, 0.25);
+  transform: scale(1.03);
 }
 
-@media (max-width: 768px) {
+.no-lyrics {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 16px;
+}
+
+@media (max-width: 1024px) {
   .lyric-line {
-    font-size: 16px;
-    height: 48px;
-    line-height: 48px;
+    font-size: 17px;
+    height: 50px;
+    line-height: 50px;
   }
 
   .lyric-line.active {
     font-size: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .lyric-line {
+    font-size: 15px;
+    height: 45px;
+    line-height: 45px;
+    padding: 0 15px;
+  }
+
+  .lyric-line.active {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .lyric-line {
+    font-size: 14px;
+    height: 40px;
+    line-height: 40px;
+  }
+
+  .lyric-line.active {
+    font-size: 16px;
   }
 }
 </style>
