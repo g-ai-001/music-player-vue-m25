@@ -1,7 +1,8 @@
 import { ref, computed } from 'vue';
 import type { Music, LyricLine } from '../types/music';
 
-const musicList = ref<Music[]>([
+// 默认歌曲数据（当JSON加载失败时使用）
+const defaultMusicList: Music[] = [
   {
     id: 1,
     title: '晴天',
@@ -233,17 +234,82 @@ const musicList = ref<Music[]>([
 [02:48.00]如传世的青花瓷 自顾自美丽
 [02:56.00]你眼带笑意`
   }
-]);
+];
 
+// 备用封面URL映射
+const fallbackCovers: Record<number, string> = {
+  1: 'https://p2.music.126.net/8gRfNfT0_7C6C-ffq SheppardA==/109951166952713766.jpg',
+  2: 'https://p2.music.126.net/coT5aJABB-q8R3FBi7YjfA==/109951166952713766.jpg',
+  3: 'https://p1.music.126.net/hqV0D-_vlbaot3X3DnBTrg==/109951166952713766.jpg',
+  4: 'https://p2.music.126.net/QK_jJN4VMAW6V3x-kCePvw==/109951166952713766.jpg',
+  5: 'https://p1.music.126.net/AhR3MuSyNn-qXKvIIJvKPg==/109951166952713766.jpg'
+};
+
+const musicList = ref<Music[]>([]);
 const currentMusicIndex = ref(0);
 const isPlaying = ref(false);
 const currentTime = ref(0);
 const volume = ref(0.8);
 const playMode = ref<'loop' | 'single' | 'random'>('loop');
+const isLoading = ref(true);
 
-const currentMusic = computed(() => musicList.value[currentMusicIndex.value]);
+// 加载歌曲数据
+async function loadSongs() {
+  try {
+    const response = await fetch('/music/songs.json');
+    if (!response.ok) throw new Error('Failed to load songs.json');
+
+    const songs: Music[] = await response.json();
+
+    // 检查并处理封面和歌词路径
+    for (const song of songs) {
+      // 如果封面路径是相对路径，尝试加载，如果失败则使用备用封面
+      if (song.cover && song.cover.startsWith('/')) {
+        try {
+          const img = new Image();
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+            img.src = song.cover;
+          });
+        } catch {
+          // 使用备用封面
+          song.cover = fallbackCovers[song.id] || fallbackCovers[1];
+        }
+      }
+
+      // 如果歌词路径是相对路径，尝试加载
+      if (song.lyrics && song.lyrics.startsWith('/')) {
+        try {
+          const response = await fetch(song.lyrics);
+          if (response.ok) {
+            song.lyrics = await response.text();
+          } else {
+            throw new Error('Lyrics file not found');
+          }
+        } catch {
+          // 使用内嵌的默认歌词（从defaultMusicList获取）
+          const defaultSong = defaultMusicList.find(s => s.id === song.id);
+          if (defaultSong) {
+            song.lyrics = defaultSong.lyrics;
+          }
+        }
+      }
+    }
+
+    musicList.value = songs;
+  } catch (error) {
+    console.warn('Failed to load songs.json, using default songs:', error);
+    musicList.value = defaultMusicList;
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+const currentMusic = computed(() => musicList.value[currentMusicIndex.value] || defaultMusicList[0]);
 
 function parseLyrics(text: string): LyricLine[] {
+  if (!text) return [];
   const lines = text.split('\n');
   const result: LyricLine[] = [];
 
@@ -284,11 +350,22 @@ export function usePlayer() {
   }
 
   function playNext() {
-    currentMusicIndex.value = (currentMusicIndex.value + 1) % musicList.value.length;
+    if (musicList.value.length === 0) return;
+
+    if (playMode.value === 'random') {
+      let newIndex: number;
+      do {
+        newIndex = Math.floor(Math.random() * musicList.value.length);
+      } while (newIndex === currentMusicIndex.value && musicList.value.length > 1);
+      currentMusicIndex.value = newIndex;
+    } else {
+      currentMusicIndex.value = (currentMusicIndex.value + 1) % musicList.value.length;
+    }
     currentTime.value = 0;
   }
 
   function playPrev() {
+    if (musicList.value.length === 0) return;
     currentMusicIndex.value = (currentMusicIndex.value - 1 + musicList.value.length) % musicList.value.length;
     currentTime.value = 0;
   }
@@ -307,6 +384,19 @@ export function usePlayer() {
     volume.value = Math.max(0, Math.min(1, v));
   }
 
+  function setPlayMode(mode: 'loop' | 'single' | 'random') {
+    playMode.value = mode;
+  }
+
+  function togglePlayMode() {
+    const modes: ('loop' | 'single' | 'random')[] = ['loop', 'single', 'random'];
+    const currentIndex = modes.indexOf(playMode.value);
+    playMode.value = modes[(currentIndex + 1) % modes.length];
+  }
+
+  // 初始化时加载歌曲
+  loadSongs();
+
   return {
     musicList,
     currentMusicIndex,
@@ -315,6 +405,7 @@ export function usePlayer() {
     currentTime,
     volume,
     playMode,
+    isLoading,
     parseLyrics,
     formatTime,
     play,
@@ -324,6 +415,9 @@ export function usePlayer() {
     playPrev,
     selectMusic,
     setCurrentTime,
-    setVolume
+    setVolume,
+    setPlayMode,
+    togglePlayMode,
+    loadSongs
   };
 }
