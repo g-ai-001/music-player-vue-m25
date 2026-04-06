@@ -26,6 +26,12 @@
 
 ## 版本
 
+### 0.2.3
+
+- 创建public/music/covers和public/music/lyrics目录结构
+- 添加.gitkeep保持目录结构，便于用户上传歌曲封面和歌词文件
+- songs.json使用相对路径引用资源文件
+
 ### 0.2.2
 
 - 确认songs.json文件存在且使用相对路径存储歌曲数据
