@@ -133,6 +133,7 @@ export function usePlayer() {
     if (musicList.value.length === 0) return;
     currentMusicIndex.value = (currentMusicIndex.value - 1 + musicList.value.length) % musicList.value.length;
     currentTime.value = 0;
+    isPlaying.value = true;
   }
 
   function selectMusic(index: number) {

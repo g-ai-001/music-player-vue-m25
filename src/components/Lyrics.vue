@@ -105,8 +105,10 @@ const offset = computed(() => {
   const base = autoOffset.value;
   const manual = manualOffset.value;
 
-  // 限制在合理范围内
-  const maxOffset = maxScrollOffset.value;
+  // 限制在合理范围内，但需要至少能容纳autoOffset
+  const scrollableOffset = maxScrollOffset.value;
+  // 确保maxOffset至少能容纳autoOffset，这样歌词才能居中
+  const maxOffset = Math.max(scrollableOffset, Math.abs(base));
   const minOffset = -maxOffset; // 允许向下滚动一点
 
   // 如果是自动滚动模式，重置手动偏移
@@ -132,13 +134,16 @@ watch(currentLineIndex, async (newIndex) => {
 
 // 滚轮事件处理
 function onWheel(e: WheelEvent) {
+  // deltaY > 0 表示向下滚动（滚轮向下），此时歌词应该向上移动（offset减少，显示更早的歌词）
+  // deltaY < 0 表示向上滚动（滚轮向上），此时歌词应该向下移动（offset增加，显示更晚的歌词）
+  // 因此需要用 -e.deltaY 来修正滚动方向
   if (isManualScrolling.value) {
     // 手动模式下，累加滚动
-    manualOffset.value += e.deltaY * 0.5;
+    manualOffset.value -= e.deltaY * 0.5;
   } else {
     // 自动模式下，切换到手动模式
     isManualScrolling.value = true;
-    manualOffset.value = offset.value - autoOffset.value + e.deltaY * 0.5;
+    manualOffset.value = offset.value - autoOffset.value - e.deltaY * 0.5;
   }
 
   // 重置自动滚动计时器

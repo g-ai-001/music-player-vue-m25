@@ -57,7 +57,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 import { usePlayer } from '../composables/usePlayer';
 import Lyrics from './Lyrics.vue';
 import ProgressBar from './ProgressBar.vue';
@@ -80,6 +80,27 @@ const {
 
 const audioRef = ref<HTMLAudioElement | null>(null);
 const duration = ref(0);
+const needsAutoPlay = ref(true); // 是否需要自动播放
+
+// 尝试自动播放
+async function attemptAutoPlay() {
+  if (!audioRef.value || !needsAutoPlay.value) return;
+
+  try {
+    await audioRef.value.play();
+    needsAutoPlay.value = false;
+  } catch (error) {
+    // 自动播放被阻止，等待用户交互
+    console.log('自动播放被阻止，等待用户交互');
+  }
+}
+
+// 用户首次交互时尝试播放
+function handleUserInteraction() {
+  if (needsAutoPlay.value) {
+    attemptAutoPlay();
+  }
+}
 
 function onTimeUpdate() {
   if (audioRef.value) {
@@ -133,6 +154,8 @@ watch(currentMusic, () => {
     audioRef.value.currentTime = 0;
     duration.value = audioRef.value.duration || currentMusic.value.duration;
   }
+  // 切换歌曲后也需要自动播放
+  needsAutoPlay.value = true;
 });
 
 watch(volume, (newVolume) => {
@@ -145,11 +168,19 @@ onMounted(() => {
   if (audioRef.value) {
     audioRef.value.volume = volume.value;
     duration.value = audioRef.value.duration || currentMusic.value.duration;
-    // 页面加载完成后自动播放
-    audioRef.value.play().catch(() => {
-      // 自动播放被浏览器阻止时，等待用户交互
-    });
   }
+
+  // 添加用户交互监听器
+  document.addEventListener('click', handleUserInteraction);
+  document.addEventListener('touchstart', handleUserInteraction);
+
+  // 页面加载完成后尝试自动播放
+  attemptAutoPlay();
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleUserInteraction);
+  document.removeEventListener('touchstart', handleUserInteraction);
 });
 </script>
 
