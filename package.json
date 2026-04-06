@@ -1,6 +1,6 @@
 {
   "name": "music-player-vue-m25",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "基于Vue3的音乐播放器网页应用",
   "type": "module",
   "scripts": {
