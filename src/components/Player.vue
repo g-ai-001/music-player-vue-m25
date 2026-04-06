@@ -145,6 +145,10 @@ onMounted(() => {
   if (audioRef.value) {
     audioRef.value.volume = volume.value;
     duration.value = audioRef.value.duration || currentMusic.value.duration;
+    // 页面加载完成后自动播放
+    audioRef.value.play().catch(() => {
+      // 自动播放被浏览器阻止时，等待用户交互
+    });
   }
 });
 </script>

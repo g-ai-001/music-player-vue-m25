@@ -2,17 +2,17 @@
   <div class="controls-wrapper">
     <!-- 播放控制按钮 -->
     <div class="controls">
-      <button class="control-btn" @click="togglePlay">
+      <button class="control-btn" @click="playPrev">
+        <svg viewBox="0 0 24 24" width="28" height="28">
+          <path fill="currentColor" d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+        </svg>
+      </button>
+      <button class="control-btn play-btn" @click="togglePlay">
         <svg v-if="!isPlaying" viewBox="0 0 24 24" width="32" height="32">
           <path fill="currentColor" d="M8 5v14l11-7z"/>
         </svg>
         <svg v-else viewBox="0 0 24 24" width="32" height="32">
           <path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-        </svg>
-      </button>
-      <button class="control-btn" @click="playPrev">
-        <svg viewBox="0 0 24 24" width="28" height="28">
-          <path fill="currentColor" d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
         </svg>
       </button>
       <button class="control-btn" @click="playNext">
@@ -159,13 +159,13 @@ function toggleMute() {
   transform: scale(1.05);
 }
 
-.control-btn:first-child {
+.control-btn.play-btn {
   width: 72px;
   height: 72px;
   background: #1db954;
 }
 
-.control-btn:first-child:hover {
+.control-btn.play-btn:hover {
   background: #1ed760;
 }
 
@@ -263,7 +263,7 @@ function toggleMute() {
     height: 48px;
   }
 
-  .control-btn:first-child {
+  .control-btn.play-btn {
     width: 60px;
     height: 60px;
   }

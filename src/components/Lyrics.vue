@@ -1,5 +1,12 @@
 <template>
-  <div class="lyrics-container" ref="lyricsRef">
+  <div
+    class="lyrics-container"
+    ref="lyricsRef"
+    @wheel.prevent="onWheel"
+    @touchstart="onTouchStart"
+    @touchmove.prevent="onTouchMove"
+    @touchend="onTouchEnd"
+  >
     <div class="lyrics-content" :style="{ transform: `translateY(${offset}px)` }">
       <div
         v-for="(line, index) in parsedLyrics"
@@ -9,6 +16,7 @@
           active: index === currentLineIndex,
           past: index < currentLineIndex
         }"
+        :ref="el => { if (el) lineRefs[index] = el as HTMLElement }"
       >
         {{ line.text }}
       </div>
@@ -20,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch, nextTick } from 'vue';
 import { usePlayer } from '../composables/usePlayer';
 
 const props = defineProps<{
@@ -30,6 +38,19 @@ const props = defineProps<{
 
 const { parseLyrics } = usePlayer();
 const lyricsRef = ref<HTMLElement | null>(null);
+const lineRefs = ref<HTMLElement[]>([]);
+
+// 手动滚动状态
+const isManualScrolling = ref(false);
+const manualScrollTimeout = ref<number | null>(null);
+
+// 触摸滚动状态
+const touchStartY = ref(0);
+const lastTouchY = ref(0);
+const isTouchScrolling = ref(false);
+
+// 当前手动滚动偏移
+const manualOffset = ref(0);
 
 const parsedLyrics = computed(() => parseLyrics(props.lyrics));
 
@@ -45,16 +66,130 @@ const currentLineIndex = computed(() => {
   return -1;
 });
 
-// 使用 requestAnimationFrame 优化滚动性能
-const offset = computed(() => {
-  if (currentLineIndex.value === -1) {
+// 计算最大滚动偏移（正值，表示可以向上滚动的最大距离）
+const maxScrollOffset = computed(() => {
+  if (!lyricsRef.value || parsedLyrics.value.length === 0) return 0;
+
+  const containerHeight = lyricsRef.value.clientHeight;
+  const totalLyricsHeight = parsedLyrics.value.length * 55;
+  const diff = totalLyricsHeight - containerHeight;
+
+  // 如果歌词总高度小于容器高度，不需要滚动
+  if (diff <= 0) return 0;
+
+  // 最大向上滚动距离（留出一些底部空间）
+  return diff + 55;
+});
+
+// 自动滚动偏移 - 高亮歌词居中
+const autoOffset = computed(() => {
+  if (currentLineIndex.value === -1 || !lyricsRef.value) {
     return 0;
   }
+
   const lineHeight = 55;
-  const containerHeight = lyricsRef.value?.clientHeight || 400;
-  const targetOffset = containerHeight / 2 - (currentLineIndex.value + 1) * lineHeight;
-  return Math.max(0, targetOffset);
+  const containerHeight = lyricsRef.value.clientHeight;
+
+  // 计算将当前行居中需要的偏移
+  // 当前行位于 currentLineIndex * lineHeight
+  // 容器中心在 containerHeight / 2
+  // 所以需要将 currentLineIndex * lineHeight 移动到 containerHeight / 2
+  const targetPosition = containerHeight / 2 - lineHeight / 2;
+  const currentPosition = currentLineIndex.value * lineHeight;
+
+  return targetPosition - currentPosition;
 });
+
+// 总偏移 = 自动偏移 + 手动偏移
+const offset = computed(() => {
+  const base = autoOffset.value;
+  const manual = manualOffset.value;
+
+  // 限制在合理范围内
+  const maxOffset = maxScrollOffset.value;
+  const minOffset = -maxOffset; // 允许向下滚动一点
+
+  // 如果是自动滚动模式，重置手动偏移
+  if (!isManualScrolling.value) {
+    return Math.max(minOffset, Math.min(maxOffset, base));
+  }
+
+  // 手动滚动模式
+  return Math.max(minOffset, Math.min(maxOffset, base + manual));
+});
+
+// 监听当前行变化，自动滚动到居中位置（如果没有手动滚动）
+watch(currentLineIndex, async (newIndex) => {
+  if (isManualScrolling.value || isTouchScrolling.value) return;
+  if (newIndex === -1) return;
+
+  // 等待DOM更新
+  await nextTick();
+
+  // 重置手动偏移
+  manualOffset.value = 0;
+});
+
+// 滚轮事件处理
+function onWheel(e: WheelEvent) {
+  if (isManualScrolling.value) {
+    // 手动模式下，累加滚动
+    manualOffset.value += e.deltaY * 0.5;
+  } else {
+    // 自动模式下，切换到手动模式
+    isManualScrolling.value = true;
+    manualOffset.value = offset.value - autoOffset.value + e.deltaY * 0.5;
+  }
+
+  // 重置自动滚动计时器
+  resetManualScrollTimer();
+}
+
+// 触摸开始
+function onTouchStart(e: TouchEvent) {
+  if (e.touches.length !== 1) return;
+
+  touchStartY.value = e.touches[0].clientY;
+  lastTouchY.value = e.touches[0].clientY;
+  isTouchScrolling.value = true;
+  isManualScrolling.value = true;
+}
+
+// 触摸移动
+function onTouchMove(e: TouchEvent) {
+  if (!isTouchScrolling.value || e.touches.length !== 1) return;
+
+  const currentY = e.touches[0].clientY;
+  const deltaY = lastTouchY.value - currentY;
+
+  manualOffset.value += deltaY;
+  lastTouchY.value = currentY;
+
+  // 限制范围
+  const maxOffset = maxScrollOffset.value;
+  const minOffset = -maxOffset;
+  manualOffset.value = Math.max(minOffset, Math.min(maxOffset, manualOffset.value));
+}
+
+// 触摸结束
+function onTouchEnd() {
+  isTouchScrolling.value = false;
+
+  // 如果触摸后停止一段时间，恢复自动滚动
+  resetManualScrollTimer();
+}
+
+// 重置手动滚动计时器
+function resetManualScrollTimer() {
+  if (manualScrollTimeout.value) {
+    clearTimeout(manualScrollTimeout.value);
+  }
+
+  manualScrollTimeout.value = window.setTimeout(() => {
+    isManualScrolling.value = false;
+    manualOffset.value = 0;
+  }, 5000); // 5秒后恢复自动滚动
+}
 </script>
 
 <style scoped>
@@ -64,6 +199,14 @@ const offset = computed(() => {
   position: relative;
   display: flex;
   flex-direction: column;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+}
+
+.lyrics-container:active {
+  cursor: grabbing;
 }
 
 .lyrics-content {

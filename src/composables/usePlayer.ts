@@ -126,6 +126,7 @@ export function usePlayer() {
       currentMusicIndex.value = (currentMusicIndex.value + 1) % musicList.value.length;
     }
     currentTime.value = 0;
+    isPlaying.value = true;
   }
 
   function playPrev() {
