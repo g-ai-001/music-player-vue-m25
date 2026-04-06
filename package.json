@@ -1,0 +1,27 @@
+{
+  "name": "music-player-vue-m25",
+  "version": "0.1.0",
+  "description": "基于Vue3的音乐播放器网页应用",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "vue3",
+    "music-player",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "typescript": "^5.7.3",
+    "vite": "^6.4.1",
+    "vue-tsc": "^2.2.8"
+  }
+}
