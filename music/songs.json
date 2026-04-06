@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "title": "加载中",
+    "artist": "加载中",
+    "album": "加载中",
+    "duration": 267,
+    "src": "./music/songs/1.flac",
+    "cover": "./music/covers/1.png",
+    "lyrics": "./music/lyrics/1.lrc"
+  },
+  {
+    "id": 2,
+    "title": "加载中",
+    "artist": "加载中",
+    "album": "加载中",
+    "duration": 252,
+    "src": "./music/songs/2.flac",
+    "cover": "./music/covers/2.png",
+    "lyrics": "./music/lyrics/2.lrc"
+  }
+]
