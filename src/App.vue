@@ -22,8 +22,6 @@ const backgroundStyle = computed(() => ({
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
-
 * {
   margin: 0;
   padding: 0;
@@ -37,7 +35,7 @@ html, body, #app {
 }
 
 body {
-  font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

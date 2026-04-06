@@ -82,11 +82,31 @@ const audioRef = ref<HTMLAudioElement | null>(null);
 const duration = ref(0);
 const needsAutoPlay = ref(true); // 是否需要自动播放
 
+// 使用AudioContext解锁音频播放
+function unlockAudio() {
+  try {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    if (audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
+    // 创建一个短暂的音频来解锁
+    const buffer = audioContext.createBuffer(1, 1, 22050);
+    const source = audioContext.createBufferSource();
+    source.buffer = buffer;
+    source.connect(audioContext.destination);
+    source.start(0);
+  } catch (e) {
+    console.log('AudioContext unlock failed:', e);
+  }
+}
+
 // 尝试自动播放
 async function attemptAutoPlay() {
   if (!audioRef.value || !needsAutoPlay.value) return;
 
   try {
+    // 先尝试解锁AudioContext
+    unlockAudio();
     await audioRef.value.play();
     needsAutoPlay.value = false;
   } catch (error) {
