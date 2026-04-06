@@ -8,9 +8,9 @@
 ## 版本历史
 
 ### 0.2.3 版本 - 修复资源目录结构
-- [x] 创建public/music/covers和public/music/lyrics目录
-- [x] 确保songs.json中的相对路径引用正确
-- [x] 更新.gitignore添加package-lock.json
+- [ ] 创建public/music/covers和public/music/lyrics目录
+- [ ] 确保songs.json中的相对路径引用正确
+- [ ] 更新.gitignore添加package-lock.json
 
 ### 0.2.2 版本 - 修复歌曲数据JSON化
 - [x] 确认songs.json文件存在且使用相对路径
