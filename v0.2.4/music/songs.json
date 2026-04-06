@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "title": "晴天",
+    "artist": "周杰伦",
+    "album": "叶惠美",
+    "duration": 267,
+    "src": "https://music.163.com/song/media/outer/url?id=186995.mp3",
+    "cover": "/music/covers/1.jpg",
+    "lyrics": "/music/lyrics/1.lrc"
+  },
+  {
+    "id": 2,
+    "title": "夜曲",
+    "artist": "周杰伦",
+    "album": "十一月的萧邦",
+    "duration": 252,
+    "src": "https://music.163.com/song/media/outer/url?id=186995.mp3",
+    "cover": "/music/covers/2.jpg",
+    "lyrics": "/music/lyrics/2.lrc"
+  },
+  {
+    "id": 3,
+    "title": "稻香",
+    "artist": "周杰伦",
+    "album": "魔杰座",
+    "duration": 218,
+    "src": "https://music.163.com/song/media/outer/url?id=186995.mp3",
+    "cover": "/music/covers/3.jpg",
+    "lyrics": "/music/lyrics/3.lrc"
+  },
+  {
+    "id": 4,
+    "title": "七里香",
+    "artist": "周杰伦",
+    "album": "七里香",
+    "duration": 246,
+    "src": "https://music.163.com/song/media/outer/url?id=186995.mp3",
+    "cover": "/music/covers/4.jpg",
+    "lyrics": "/music/lyrics/4.lrc"
+  },
+  {
+    "id": 5,
+    "title": "青花瓷",
+    "artist": "周杰伦",
+    "album": "我很忙",
+    "duration": 234,
+    "src": "https://music.163.com/song/media/outer/url?id=186995.mp3",
+    "cover": "/music/covers/5.jpg",
+    "lyrics": "/music/lyrics/5.lrc"
+  }
+]
