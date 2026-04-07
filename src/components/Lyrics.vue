@@ -7,9 +7,12 @@
     @touchmove.prevent="onTouchMove"
     @touchend="onTouchEnd"
   >
-    <div 
-      class="lyrics-content" 
-      :class="{ 'smooth-transition': !isManualScrolling }"
+    <div
+      class="lyrics-content"
+      :class="{ 
+        'smooth-transition': useSmoothTransition,
+        'momentum-scrolling': isMomentumScrolling 
+      }"
       :style="{ transform: `translateY(${offset}px)` }"
     >
       <div
@@ -52,9 +55,22 @@ const manualScrollTimeout = ref<number | null>(null);
 const touchStartY = ref(0);
 const lastTouchY = ref(0);
 const isTouchScrolling = ref(false);
+const touchVelocity = ref(0);
+const touchTimestamps = ref<Array<{ y: number; time: number }>>([]);
+
+// 惯性滚动状态
+const isMomentumScrolling = ref(false);
+let momentumAnimationId: number | null = null;
+let momentumStartOffset = 0;
+let momentumTargetOffset = 0;
+let momentumStartTime = 0;
+let momentumDuration = 0;
 
 // 当前手动滚动偏移
 const manualOffset = ref(0);
+
+// 过渡模式控制
+const useSmoothTransition = ref(true);
 
 // 容器高度响应式变量
 const containerHeight = ref(0);
@@ -65,13 +81,13 @@ let resizeObserver: ResizeObserver | null = null;
 onMounted(() => {
   if (lyricsRef.value) {
     containerHeight.value = lyricsRef.value.clientHeight;
-    
+
     resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         containerHeight.value = entry.contentRect.height;
       }
     });
-    
+
     resizeObserver.observe(lyricsRef.value);
   }
 });
@@ -79,6 +95,10 @@ onMounted(() => {
 onUnmounted(() => {
   if (resizeObserver) {
     resizeObserver.disconnect();
+  }
+  // 清理惯性滚动动画
+  if (momentumAnimationId) {
+    cancelAnimationFrame(momentumAnimationId);
   }
 });
 
@@ -182,17 +202,123 @@ watch(currentLineIndex, async (newIndex) => {
 
 // 监听自动偏移变化，确保过渡平滑
 watch(autoOffset, async () => {
-  if (!isManualScrolling.value) {
+  if (!isManualScrolling.value && !isMomentumScrolling.value) {
     await nextTick();
     // 自动模式下，强制重置手动偏移
     manualOffset.value = 0;
   }
 });
 
+// 缓动函数 -  ease-out cubic
+function easeOutCubic(t: number): number {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+// 惯性滚动动画
+function startMomentumAnimation(currentVelocity: number) {
+  // 取消之前的惯性滚动动画
+  if (momentumAnimationId) {
+    cancelAnimationFrame(momentumAnimationId);
+  }
+
+  momentumStartOffset = manualOffset.value;
+  momentumStartTime = performance.now();
+  
+  // 计算滚动距离（速度越大，滚动越远）
+  const scrollDistance = currentVelocity * 100; // 速度映射到距离
+  momentumTargetOffset = manualOffset.value - scrollDistance;
+  
+  // 限制在合理范围内
+  const maxOffset = maxScrollOffset.value;
+  const minOffset = -maxOffset;
+  momentumTargetOffset = Math.max(minOffset, Math.min(maxOffset, momentumTargetOffset));
+  
+  // 计算动画持续时间（速度越大，时间越长，但不超过800ms）
+  momentumDuration = Math.min(800, Math.abs(scrollDistance) * 2);
+  
+  isMomentumScrolling.value = true;
+  useSmoothTransition.value = false;
+
+  function animate(currentTime: number) {
+    const elapsed = currentTime - momentumStartTime;
+    const progress = Math.min(elapsed / momentumDuration, 1);
+    const easedProgress = easeOutCubic(progress);
+    
+    // 计算当前偏移
+    manualOffset.value = momentumStartOffset + (momentumTargetOffset - momentumStartOffset) * easedProgress;
+    
+    if (progress < 1) {
+      momentumAnimationId = requestAnimationFrame(animate);
+    } else {
+      // 动画结束
+      isMomentumScrolling.value = false;
+      manualOffset.value = momentumTargetOffset;
+      
+      // 如果在边界外，添加回弹效果
+      const maxOffset = maxScrollOffset.value;
+      const minOffset = -maxOffset;
+      
+      if (manualOffset.value > maxOffset || manualOffset.value < minOffset) {
+        startBounceAnimation();
+      } else {
+        // 开始恢复自动滚动
+        resetManualScrollTimer();
+      }
+    }
+  }
+  
+  momentumAnimationId = requestAnimationFrame(animate);
+}
+
+// 边界回弹动画
+function startBounceAnimation() {
+  const maxOffset = maxScrollOffset.value;
+  const minOffset = -maxOffset;
+  const currentOffset = manualOffset.value;
+  
+  // 计算目标位置（边界内）
+  const targetOffset = Math.max(minOffset, Math.min(maxOffset, currentOffset));
+  
+  // 如果已经在边界内，不需要回弹
+  if (Math.abs(currentOffset - targetOffset) < 1) {
+    manualOffset.value = targetOffset;
+    resetManualScrollTimer();
+    return;
+  }
+  
+  useSmoothTransition.value = false;
+  const startTime = performance.now();
+  const duration = 300; // 回弹动画持续时间
+  
+  function animateBounce(currentTime: number) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const easedProgress = easeOutCubic(progress);
+    
+    manualOffset.value = currentOffset + (targetOffset - currentOffset) * easedProgress;
+    
+    if (progress < 1) {
+      requestAnimationFrame(animateBounce);
+    } else {
+      manualOffset.value = targetOffset;
+      resetManualScrollTimer();
+    }
+  }
+  
+  requestAnimationFrame(animateBounce);
+}
+
 // 滚轮事件处理
 function onWheel(e: WheelEvent) {
   // 滚轮向下（deltaY > 0）：应该查看更晚的歌词 → offset 减少
   // 滚轮向上（deltaY < 0）：应该查看更早的歌词 → offset 增加
+
+  // 取消惯性滚动动画
+  if (momentumAnimationId) {
+    cancelAnimationFrame(momentumAnimationId);
+    momentumAnimationId = null;
+    isMomentumScrolling.value = false;
+  }
 
   // 进入手动滚动模式
   if (!isManualScrolling.value) {
@@ -226,6 +352,16 @@ function onTouchMove(e: TouchEvent) {
   // 手指向下滑：currentY > lastY → deltaY < 0 → 应该看到更早的歌词 → offset 增加
   const deltaY = lastTouchY.value - currentY;
 
+  // 记录触摸历史用于计算速度
+  touchTimestamps.value.push({
+    y: currentY,
+    time: performance.now()
+  });
+  
+  // 只保留最近100ms的数据
+  const now = performance.now();
+  touchTimestamps.value = touchTimestamps.value.filter(p => now - p.time <= 100);
+
   manualOffset.value -= deltaY;
   lastTouchY.value = currentY;
 
@@ -238,6 +374,27 @@ function onTouchMove(e: TouchEvent) {
 // 触摸结束
 function onTouchEnd() {
   isTouchScrolling.value = false;
+
+  // 计算触摸速度
+  if (touchTimestamps.value.length >= 2) {
+    const first = touchTimestamps.value[0];
+    const last = touchTimestamps.value[touchTimestamps.value.length - 1];
+    const timeDelta = last.time - first.time;
+    
+    if (timeDelta > 0) {
+      const velocity = (last.y - first.y) / timeDelta; // 像素/毫秒
+      touchVelocity.value = velocity;
+      
+      // 如果速度足够大，启动惯性滚动
+      if (Math.abs(velocity) > 0.3) {
+        startMomentumAnimation(velocity);
+        touchTimestamps.value = [];
+        return;
+      }
+    }
+  }
+  
+  touchTimestamps.value = [];
 
   // 如果触摸后停止一段时间，恢复自动滚动
   resetManualScrollTimer();
@@ -285,13 +442,22 @@ function resetManualScrollTimer() {
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.lyrics-content.momentum-scrolling {
+  transition: none;
+}
+
 .lyric-line {
   height: 55px;
   line-height: 55px;
   text-align: center;
   color: rgba(255, 255, 255, 0.35);
   font-size: 18px;
-  transition: color 0.3s ease, font-size 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease;
+  transition: 
+    color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    font-size 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    text-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -299,6 +465,7 @@ function resetManualScrollTimer() {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  will-change: transform, opacity;
 }
 
 .lyric-line.past {
@@ -309,7 +476,7 @@ function resetManualScrollTimer() {
   color: #fff;
   font-size: 22px;
   font-weight: 600;
-  text-shadow: 
+  text-shadow:
     0 0 20px rgba(29, 185, 84, 0.6),
     0 0 40px rgba(29, 185, 84, 0.3),
     0 2px 10px rgba(0, 0, 0, 0.3);
@@ -318,6 +485,22 @@ function resetManualScrollTimer() {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   letter-spacing: 0.5px;
+  animation: activeLinePulse 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes activeLinePulse {
+  0% {
+    transform: scale(0.95) translateZ(0);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.08) translateZ(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.05) translateZ(0);
+    opacity: 1;
+  }
 }
 
 .no-lyrics {

@@ -23,7 +23,8 @@
     </div>
 
     <!-- 音量控制和播放模式 -->
-    <div class="extra-controls">
+    <transition name="fade">
+      <div class="extra-controls" v-if="showExtraControls">
       <div class="volume-control">
         <button class="control-btn-small" @click="toggleMute">
           <svg v-if="volume === 0 || isMuted" viewBox="0 0 24 24" width="20" height="20">
@@ -64,11 +65,12 @@
         <span class="play-mode-text">{{ playModeText }}</span>
       </button>
     </div>
+    </transition>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 
 const props = defineProps<{
   isPlaying: boolean;
@@ -85,6 +87,10 @@ const emit = defineEmits<{
 }>();
 
 const isMuted = ref(false);
+const windowHeight = ref(0);
+
+// 当窗口高度小于500px时隐藏额外控件
+const showExtraControls = computed(() => windowHeight.value >= 500);
 
 const playModeText = computed(() => {
   switch (props.playMode) {
@@ -123,6 +129,20 @@ function onVolumeChange(event: Event) {
 function toggleMute() {
   isMuted.value = !isMuted.value;
 }
+
+// 监听窗口高度变化
+function updateHeight() {
+  windowHeight.value = window.innerHeight;
+}
+
+onMounted(() => {
+  updateHeight();
+  window.addEventListener('resize', updateHeight);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateHeight);
+});
 </script>
 
 <style scoped>
@@ -174,6 +194,18 @@ function toggleMute() {
   align-items: center;
   justify-content: center;
   gap: 30px;
+}
+
+/* Transition动画 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 
 .volume-control {

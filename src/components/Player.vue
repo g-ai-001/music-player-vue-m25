@@ -174,9 +174,44 @@ onMounted(() => {
   flex-direction: column;
   height: 100%;
   max-height: 100%;
-  min-height: 0;
+  min-height: 0; /* 默认允许压缩，用于横向布局 */
   position: relative;
   overflow: hidden;
+}
+
+/* 手机竖屏 - 上下布局,歌词在下方 */
+@media (max-width: 768px) and (orientation: portrait) {
+  .player {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: auto; /* 纵向布局中不允许压缩，确保内容可见 */
+  }
+
+  .player-content {
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    display: flex;
+    overflow: hidden;
+  }
+
+  .player-left {
+    width: 100%;
+    min-width: unset;
+    padding: 15px 20px 10px;
+    flex: 0 0 auto; /* 不伸缩，确保内容可见 */
+    max-height: none;
+    gap: 10px;
+    overflow: visible;
+    min-height: 200px; /* 确保有足够空间显示封面和歌曲信息 */
+  }
+
+  .cover-container {
+    width: 120px;
+    height: 120px;
+    flex-shrink: 0; /* 封面不被压缩 */
+  }
 }
 
 .loading-overlay {
@@ -288,6 +323,7 @@ onMounted(() => {
 .song-info {
   text-align: center;
   width: 100%;
+  flex-shrink: 0; /* 歌曲信息不被压缩 */
 }
 
 .song-title {
@@ -373,15 +409,17 @@ onMounted(() => {
     width: 100%;
     min-width: unset;
     padding: 15px 20px 10px;
-    flex: none;
+    flex: 0 0 auto; /* 不伸缩，确保内容可见 */
     max-height: none;
     gap: 10px;
     overflow: visible;
+    min-height: 200px; /* 确保有足够空间显示封面和歌曲信息 */
   }
 
   .cover-container {
     width: 120px;
     height: 120px;
+    flex-shrink: 0; /* 封面不被压缩 */
   }
 
   .cover-container::after {
@@ -445,15 +483,17 @@ onMounted(() => {
     width: 50%;
     min-width: 250px;
     padding: 15px 20px 10px;
-    flex: none;
+    flex: 0 0 auto; /* 不伸缩，确保内容可见 */
     gap: 12px;
     overflow: visible;
     justify-content: center;
+    min-height: 250px; /* 确保有足够空间显示封面和歌曲信息 */
   }
 
   .cover-container {
     width: 140px;
     height: 140px;
+    flex-shrink: 0; /* 封面不被压缩 */
   }
 
   .cover-container::after {
@@ -504,6 +544,7 @@ onMounted(() => {
     height: 100%;
     display: flex;
     flex-direction: column;
+    min-height: auto; /* 纵向布局中不允许压缩，确保内容可见 */
   }
 
   .player-content {
@@ -518,15 +559,17 @@ onMounted(() => {
     width: 50%;
     min-width: 280px;
     padding: 20px;
-    flex: none;
+    flex: 0 0 auto; /* 不伸缩，确保内容可见 */
     gap: 15px;
     overflow: visible;
     justify-content: center;
+    min-height: 300px; /* 确保有足够空间显示封面和歌曲信息 */
   }
 
   .cover-container {
     width: 160px;
     height: 160px;
+    flex-shrink: 0; /* 封面不被压缩 */
   }
 
   .cover-container::after {
@@ -577,6 +620,7 @@ onMounted(() => {
     height: 100%;
     display: flex;
     flex-direction: column;
+    min-height: auto; /* 纵向布局中不允许压缩，确保内容可见 */
   }
 
   .player-content {
@@ -591,15 +635,17 @@ onMounted(() => {
     width: 50%;
     min-width: 300px;
     padding: 20px 25px 15px;
-    flex: none;
+    flex: 0 0 auto; /* 不伸缩，确保内容可见 */
     gap: 15px;
     overflow: visible;
     justify-content: center;
+    min-height: 300px; /* 确保有足够空间显示封面和歌曲信息 */
   }
 
   .cover-container {
     width: 180px;
     height: 180px;
+    flex-shrink: 0; /* 封面不被压缩 */
   }
 
   .cover-container::after {
@@ -650,6 +696,7 @@ onMounted(() => {
     height: 100%;
     display: flex;
     flex-direction: column;
+    min-height: auto; /* 纵向布局中不允许压缩，确保内容可见 */
   }
 
   .player-content {
@@ -664,15 +711,17 @@ onMounted(() => {
     width: 50%;
     min-width: 320px;
     padding: 25px;
-    flex: none;
+    flex: 0 0 auto; /* 不伸缩，确保内容可见 */
     gap: 18px;
     overflow: visible;
     justify-content: center;
+    min-height: 350px; /* 确保有足够空间显示封面和歌曲信息 */
   }
 
   .cover-container {
     width: 190px;
     height: 190px;
+    flex-shrink: 0; /* 封面不被压缩 */
   }
 
   .cover-container::after {
@@ -738,11 +787,14 @@ onMounted(() => {
     padding: 30px;
     gap: 20px;
     justify-content: center;
+    flex: 0 0 auto; /* 不伸缩，确保内容可见 */
+    min-height: 400px; /* 确保有足够空间显示封面和歌曲信息 */
   }
 
   .cover-container {
     width: 220px;
     height: 220px;
+    flex-shrink: 0; /* 封面不被压缩 */
   }
 
   .song-title {
@@ -764,11 +816,14 @@ onMounted(() => {
   .player-left {
     padding: 12px 16px 6px;
     gap: 10px;
+    flex: 0 0 auto;
+    min-height: 180px; /* 确保有足够空间显示封面和歌曲信息 */
   }
 
   .cover-container {
     width: 110px;
     height: 110px;
+    flex-shrink: 0; /* 封面不被压缩 */
   }
 
   .song-title {
