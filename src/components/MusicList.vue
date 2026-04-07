@@ -267,7 +267,8 @@ onUpdated(async () => {
   .music-list {
     width: 100%;
     height: auto;
-    max-height: 30vh;
+    min-height: 180px; /* 确保最小可用高度 */
+    max-height: 35vh; /* 增加 max-height 从 30vh 到 35vh */
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     flex-shrink: 0;
@@ -276,6 +277,7 @@ onUpdated(async () => {
   .list-title {
     padding: 12px 15px;
     font-size: 15px;
+    flex-shrink: 0; /* 防止标题被压缩 */
   }
 
   .list-container {
@@ -285,6 +287,7 @@ onUpdated(async () => {
     overflow-y: hidden;
     padding: 8px 10px;
     gap: 10px;
+    min-height: 0; /* 允许容器正确计算高度 */
   }
 
   .music-item {
@@ -345,7 +348,8 @@ onUpdated(async () => {
   .music-list {
     width: 100%;
     height: auto;
-    max-height: 25vh;
+    min-height: 200px; /* 确保最小可用高度 */
+    max-height: 30vh; /* 增加 max-height 从 25vh 到 30vh */
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     flex-shrink: 0;
@@ -354,6 +358,7 @@ onUpdated(async () => {
   .list-title {
     padding: 14px 18px;
     font-size: 16px;
+    flex-shrink: 0; /* 防止标题被压缩 */
   }
 
   .list-container {
@@ -363,6 +368,7 @@ onUpdated(async () => {
     overflow-y: hidden;
     padding: 10px 12px;
     gap: 12px;
+    min-height: 0; /* 允许容器正确计算高度 */
   }
 
   .music-item {
@@ -416,7 +422,8 @@ onUpdated(async () => {
   .music-list {
     width: 100%;
     height: auto;
-    max-height: 25vh;
+    min-height: 200px; /* 确保最小可用高度 */
+    max-height: 30vh; /* 增加 max-height 从 25vh 到 30vh */
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     flex-shrink: 0;
@@ -425,6 +432,7 @@ onUpdated(async () => {
   .list-title {
     padding: 14px 18px;
     font-size: 16px;
+    flex-shrink: 0; /* 防止标题被压缩 */
   }
 
   .list-container {
@@ -434,6 +442,7 @@ onUpdated(async () => {
     overflow-y: hidden;
     padding: 10px 12px;
     gap: 12px;
+    min-height: 0; /* 允许容器正确计算高度 */
   }
 
   .music-item {
@@ -487,7 +496,8 @@ onUpdated(async () => {
   .music-list {
     width: 100%;
     height: auto;
-    max-height: 25vh;
+    min-height: 200px; /* 确保最小可用高度 */
+    max-height: 30vh; /* 增加 max-height 从 25vh 到 30vh */
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     flex-shrink: 0;
@@ -496,6 +506,7 @@ onUpdated(async () => {
   .list-title {
     padding: 16px 20px;
     font-size: 17px;
+    flex-shrink: 0; /* 防止标题被压缩 */
   }
 
   .list-container {
@@ -505,6 +516,7 @@ onUpdated(async () => {
     overflow-y: hidden;
     padding: 12px 15px;
     gap: 12px;
+    min-height: 0; /* 允许容器正确计算高度 */
   }
 
   .music-item {
@@ -572,7 +584,8 @@ onUpdated(async () => {
 /* 小屏手机 */
 @media (max-width: 480px) and (orientation: portrait) {
   .music-list {
-    max-height: 40vh;
+    min-height: 160px; /* 确保最小可用高度 */
+    max-height: 45vh; /* 增加 max-height 从 40vh 到 45vh */
   }
 
   .music-item {

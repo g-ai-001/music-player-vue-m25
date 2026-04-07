@@ -9,9 +9,10 @@
   >
     <div
       class="lyrics-content"
-      :class="{ 
+      :class="{
         'smooth-transition': useSmoothTransition,
-        'momentum-scrolling': isMomentumScrolling 
+        'momentum-scrolling': isMomentumScrolling,
+        'touch-dragging': isTouchScrolling
       }"
       :style="{ transform: `translateY(${offset}px)` }"
     >
@@ -50,6 +51,7 @@ const lineRefs = ref<HTMLElement[]>([]);
 // 手动滚动状态
 const isManualScrolling = ref(false);
 const manualScrollTimeout = ref<number | null>(null);
+const autoOffsetSnapshot = ref(0); // 手动滚动开始时的autoOffset快照
 
 // 触摸滚动状态
 const touchStartY = ref(0);
@@ -57,6 +59,7 @@ const lastTouchY = ref(0);
 const isTouchScrolling = ref(false);
 const touchVelocity = ref(0);
 const touchTimestamps = ref<Array<{ y: number; time: number }>>([]);
+const touchStartManualOffset = ref(0); // 记录触摸开始时的手动偏移
 
 // 惯性滚动状态
 const isMomentumScrolling = ref(false);
@@ -177,11 +180,12 @@ const offset = computed(() => {
     return autoOffset.value;
   }
 
-  // 手动滚动模式：在自动偏移基础上加上手动偏移
-  const base = autoOffset.value;
+  // 手动滚动模式：使用快照的autoOffset + 手动偏移
+  // 这样可以避免autoOffset动态变化导致的"回弹"现象
+  const base = autoOffsetSnapshot.value;
   const manual = manualOffset.value;
 
-  // 限制在合理范围内
+  // 只在渲染时限制最终值
   const maxOffset = maxScrollOffset.value;
   const minOffset = -maxOffset;
 
@@ -337,10 +341,20 @@ function onWheel(e: WheelEvent) {
 function onTouchStart(e: TouchEvent) {
   if (e.touches.length !== 1) return;
 
+  // 取消惯性滚动动画
+  if (momentumAnimationId) {
+    cancelAnimationFrame(momentumAnimationId);
+    momentumAnimationId = null;
+    isMomentumScrolling.value = false;
+  }
+
   touchStartY.value = e.touches[0].clientY;
   lastTouchY.value = e.touches[0].clientY;
+  autoOffsetSnapshot.value = autoOffset.value; // 快照当前autoOffset
+  touchStartManualOffset.value = manualOffset.value; // 保存当前手动偏移
   isTouchScrolling.value = true;
   isManualScrolling.value = true;
+  useSmoothTransition.value = false; // 禁用过渡动画，避免拖动时的"反弹"效果
 }
 
 // 触摸移动
@@ -348,27 +362,23 @@ function onTouchMove(e: TouchEvent) {
   if (!isTouchScrolling.value || e.touches.length !== 1) return;
 
   const currentY = e.touches[0].clientY;
-  // 手指向上滑：currentY < lastY → deltaY > 0 → 应该看到更晚的歌词 → offset 减少
-  // 手指向下滑：currentY > lastY → deltaY < 0 → 应该看到更早的歌词 → offset 增加
-  const deltaY = lastTouchY.value - currentY;
+  // 手指向上滑：currentY < touchStartY → deltaY < 0 → 向上滚动查看更晚的歌词
+  // 手指向下滑：currentY > touchStartY → deltaY > 0 → 向下滚动查看更早的歌词
+  const deltaY = currentY - touchStartY.value; // 相对于触摸开始位置的总位移
 
   // 记录触摸历史用于计算速度
   touchTimestamps.value.push({
     y: currentY,
     time: performance.now()
   });
-  
+
   // 只保留最近100ms的数据
   const now = performance.now();
   touchTimestamps.value = touchTimestamps.value.filter(p => now - p.time <= 100);
 
-  manualOffset.value -= deltaY;
+  // 直接使用触摸开始时的偏移 + 当前位移，不做限制
+  manualOffset.value = touchStartManualOffset.value + deltaY;
   lastTouchY.value = currentY;
-
-  // 限制范围
-  const maxOffset = maxScrollOffset.value;
-  const minOffset = -maxOffset;
-  manualOffset.value = Math.max(minOffset, Math.min(maxOffset, manualOffset.value));
 }
 
 // 触摸结束
@@ -444,6 +454,10 @@ function resetManualScrollTimer() {
 
 .lyrics-content.momentum-scrolling {
   transition: none;
+}
+
+.lyrics-content.touch-dragging {
+  transition: none !important;
 }
 
 .lyric-line {
