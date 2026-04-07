@@ -18,7 +18,15 @@
           </div>
         </div>
         <div class="music-info">
-          <div class="music-title">{{ music.title }}</div>
+          <div class="music-title-wrapper">
+            <div 
+              class="music-title" 
+              :class="{ 'scrolling': shouldScroll(index) }"
+              :ref="el => { if (el) titleRefs[index] = el as HTMLElement }"
+            >
+              <span class="title-text">{{ music.title }}</span>
+            </div>
+          </div>
           <div class="music-artist">{{ music.artist }}</div>
         </div>
         <div class="music-duration">{{ formatTime(music.duration) }}</div>
@@ -28,13 +36,51 @@
 </template>
 
 <script setup lang="ts">
+import { ref, nextTick, onMounted, onUpdated } from 'vue';
 import { usePlayer } from '../composables/usePlayer';
 
 const { musicList, currentMusicIndex, isPlaying, formatTime, selectMusic } = usePlayer();
 
+const titleRefs = ref<HTMLElement[]>([]);
+const scrollStates = ref<Map<number, boolean>>(new Map());
+
 function handleSelect(index: number) {
   selectMusic(index);
 }
+
+// 检测标题是否溢出
+async function checkOverflow(index: number) {
+  await nextTick();
+  const titleEl = titleRefs.value[index];
+  if (!titleEl) return;
+
+  const textEl = titleEl.querySelector('.title-text') as HTMLElement;
+  if (!textEl) return;
+
+  const isOverflowing = textEl.scrollWidth > titleEl.clientWidth;
+  scrollStates.value.set(index, isOverflowing);
+}
+
+// 判断是否应该滚动
+function shouldScroll(index: number): boolean {
+  return scrollStates.value.get(index) || false;
+}
+
+// 组件挂载后检测所有标题
+onMounted(async () => {
+  await nextTick();
+  for (let i = 0; i < musicList.value.length; i++) {
+    await checkOverflow(i);
+  }
+});
+
+// 更新后重新检测
+onUpdated(async () => {
+  await nextTick();
+  for (let i = 0; i < musicList.value.length; i++) {
+    await checkOverflow(i);
+  }
+});
 </script>
 
 <style scoped>
@@ -153,13 +199,47 @@ function handleSelect(index: number) {
   min-width: 0;
 }
 
+.music-title-wrapper {
+  overflow: hidden;
+  position: relative;
+}
+
 .music-title {
   color: #fff;
   font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  position: relative;
+}
+
+.music-title .title-text {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* 滚动动画 */
+.music-title.scrolling .title-text {
+  animation: scrollText 8s linear infinite;
+  padding-right: 50px;
+}
+
+@keyframes scrollText {
+  0% {
+    transform: translateX(0);
+  }
+  10% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-50%);
+  }
+  90% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 
 .music-item.active .music-title {
@@ -182,8 +262,55 @@ function handleSelect(index: number) {
   margin-left: 10px;
 }
 
-/* 平板适配 */
+/* 折叠屏和手机 - 无论横竖屏都使用上方列表样式 */
 @media (max-width: 1024px) {
+  .music-list {
+    width: 100%;
+    height: auto;
+    max-height: 30vh; /* 减小最大高度 */
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0; /* 不允许缩小 */
+  }
+
+  .list-title {
+    padding: 12px 15px;
+    font-size: 15px;
+  }
+
+  .list-container {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 8px 10px;
+    gap: 10px;
+  }
+
+  .music-item {
+    flex-direction: column;
+    min-width: 110px;
+    padding: 6px;
+  }
+
+  .music-cover {
+    width: 70px;
+    height: 70px;
+  }
+
+  .music-info {
+    margin-left: 0;
+    margin-top: 6px;
+    text-align: center;
+  }
+
+  .music-duration {
+    display: none;
+  }
+}
+
+/* 平板横屏 - 播放列表在左侧 */
+@media (min-width: 1025px) and (max-width: 1366px) and (orientation: landscape) {
   .music-list {
     width: 280px;
   }
@@ -195,76 +322,6 @@ function handleSelect(index: number) {
 
   .music-title {
     font-size: 13px;
-  }
-}
-
-/* 手机适配 */
-@media (max-width: 768px) {
-  .music-list {
-    width: 100%;
-    height: auto;
-    max-height: 35vh;
-    border-right: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .list-title {
-    padding: 15px;
-    font-size: 16px;
-  }
-
-  .list-container {
-    display: flex;
-    flex-direction: row;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 10px;
-    gap: 10px;
-  }
-
-  .music-item {
-    flex-direction: column;
-    min-width: 120px;
-    padding: 8px;
-  }
-
-  .music-cover {
-    width: 80px;
-    height: 80px;
-  }
-
-  .music-info {
-    margin-left: 0;
-    margin-top: 8px;
-    text-align: center;
-  }
-
-  .music-duration {
-    display: none;
-  }
-}
-
-/* 横屏手机适配 */
-@media (max-width: 768px) and (orientation: landscape) {
-  .music-list {
-    max-height: 50vh;
-  }
-
-  .list-container {
-    flex-direction: column;
-    overflow-x: hidden;
-    overflow-y: auto;
-    flex-wrap: nowrap;
-  }
-
-  .music-item {
-    flex-direction: row;
-    min-width: unset;
-  }
-
-  .music-cover {
-    width: 50px;
-    height: 50px;
   }
 }
 

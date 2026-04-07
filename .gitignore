@@ -6,3 +6,4 @@ dist
 .env.local
 package-lock.json
 .idea
+.qwen

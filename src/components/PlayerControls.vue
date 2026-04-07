@@ -254,27 +254,72 @@ function toggleMute() {
 }
 
 @media (max-width: 768px) {
-  .controls {
+  .controls-wrapper {
     gap: 15px;
   }
 
+  .controls {
+    gap: 12px;
+  }
+
   .control-btn {
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
   }
 
   .control-btn.play-btn {
-    width: 60px;
-    height: 60px;
+    width: 56px;
+    height: 56px;
   }
 
   .extra-controls {
-    flex-direction: column;
+    flex-direction: row; /* 改回横向排列，节省垂直空间 */
+    gap: 20px;
+  }
+
+  .volume-control {
+    gap: 8px;
+  }
+
+  .volume-slider-container {
+    width: 70px;
+  }
+
+  .volume-value {
+    font-size: 11px;
+    min-width: 30px;
+  }
+
+  .play-mode-text {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .controls-wrapper {
+    gap: 12px;
+  }
+
+  .controls {
+    gap: 10px;
+  }
+
+  .control-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .control-btn.play-btn {
+    width: 52px;
+    height: 52px;
+  }
+
+  .extra-controls {
     gap: 15px;
   }
 
   .volume-slider-container {
-    width: 80px;
+    width: 60px;
   }
 }
 </style>

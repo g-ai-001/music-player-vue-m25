@@ -84,15 +84,7 @@ body {
   }
 }
 
-/* 平板设备 */
-@media (max-width: 1024px) {
-  .background-overlay {
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
-  }
-}
-
-/* 手机设备 */
+/* 手机设备 - 无论横竖屏播放列表都在上方 */
 @media (max-width: 768px) {
   .main-container {
     flex-direction: column;
@@ -104,30 +96,43 @@ body {
   }
 }
 
-/* 小屏手机 */
-@media (max-width: 480px) {
-  .background-overlay {
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-  }
-}
-
-/* 折叠屏设备适配 */
+/* 折叠屏设备 - 无论横竖屏播放列表都在上方 */
 @media (min-width: 768px) and (max-width: 1024px) {
   .main-container {
-    flex-direction: row;
-  }
-}
-
-/* 横屏手机适配 */
-@media (max-width: 768px) and (orientation: landscape) {
-  .main-container {
-    flex-direction: row;
+    flex-direction: column;
   }
 
   .background-overlay {
     backdrop-filter: blur(35px);
     -webkit-backdrop-filter: blur(35px);
+  }
+}
+
+/* 平板设备 - 竖屏时播放列表在上方 */
+@media (min-width: 1025px) and (max-width: 1366px) and (orientation: portrait) {
+  .main-container {
+    flex-direction: column;
+  }
+
+  .background-overlay {
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+  }
+}
+
+/* 平板/笔记本设备 - 横屏时播放列表在左侧 */
+@media (min-width: 1025px) and (orientation: landscape) {
+  .background-overlay {
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+  }
+}
+
+/* 小屏手机 */
+@media (max-width: 480px) {
+  .background-overlay {
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
   }
 }
 </style>

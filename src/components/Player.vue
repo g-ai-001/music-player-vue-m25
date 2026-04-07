@@ -210,7 +210,10 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
+  max-height: 100%;
+  min-height: 0;
   position: relative;
+  overflow: hidden;
 }
 
 .loading-overlay {
@@ -243,8 +246,10 @@ onUnmounted(() => {
 
 .player-content {
   flex: 1;
+  min-height: 0;
   display: flex;
   overflow: hidden;
+  position: relative;
 }
 
 .player-left {
@@ -252,29 +257,48 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 40px 30px 30px;
   width: 45%;
   min-width: 380px;
+  gap: 20px; /* 统一元素间距 */
 }
 
 .cover-container {
   width: 240px;
   height: 240px;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   position: relative;
+  flex-shrink: 0;
+}
+
+.cover-container::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  background: #1a1a1a;
+  border-radius: 50%;
+  z-index: 2;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
 
 .cover-container::before {
   content: '';
   position: absolute;
-  top: -10px;
-  left: -10px;
-  right: -10px;
-  bottom: -10px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100% + 20px);
+  height: calc(100% + 20px);
   border-radius: 50%;
   border: 3px solid rgba(255, 255, 255, 0.1);
+  z-index: 1;
 }
 
 .cover-image {
@@ -282,6 +306,7 @@ onUnmounted(() => {
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
+  display: block;
 }
 
 .cover-image.playing {
@@ -299,7 +324,7 @@ onUnmounted(() => {
 
 .song-info {
   text-align: center;
-  margin-top: 30px;
+  width: 100%;
 }
 
 .song-title {
@@ -307,17 +332,19 @@ onUnmounted(() => {
   font-size: 22px;
   font-weight: 600;
   margin-bottom: 8px;
+  line-height: 1.3;
 }
 
 .song-artist {
   color: rgba(255, 255, 255, 0.8);
   font-size: 15px;
+  margin-bottom: 4px;
 }
 
 .song-album {
   color: rgba(255, 255, 255, 0.5);
   font-size: 13px;
-  margin-top: 4px;
+  line-height: 1.3;
 }
 
 .player-right {
@@ -328,14 +355,15 @@ onUnmounted(() => {
 
 .progress-bar-container {
   width: 100%;
-  padding: 0 20px 20px;
+  padding: 0 30px 25px;
+  flex-shrink: 0;
 }
 
-@media (max-width: 1024px) {
+/* 平板横屏 - 左右布局 */
+@media (min-width: 1025px) and (max-width: 1366px) and (orientation: landscape) {
   .player-left {
-    width: 40%;
-    min-width: 320px;
-    padding: 30px 15px;
+    padding: 30px 20px 25px;
+    gap: 16px;
   }
 
   .cover-container {
@@ -343,82 +371,126 @@ onUnmounted(() => {
     height: 200px;
   }
 
+  .cover-container::after {
+    width: 18px;
+    height: 18px;
+  }
+
+  .cover-container::before {
+    width: calc(100% + 18px);
+    height: calc(100% + 18px);
+  }
+
   .song-title {
     font-size: 20px;
   }
+
+  .progress-bar-container {
+    padding: 0 20px 20px;
+  }
 }
 
-@media (max-width: 768px) {
-  .player-content {
+/* 折叠屏和手机 - 无论横竖屏都使用上下布局 */
+@media (max-width: 1024px) {
+  .player {
+    height: 100%;
+    display: flex;
     flex-direction: column;
+  }
+
+  .player-content {
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    display: flex;
+    overflow: hidden;
   }
 
   .player-left {
     width: 100%;
     min-width: unset;
-    padding: 20px;
+    padding: 15px 20px 10px;
     flex: none;
+    max-height: none; /* 移除最大高度限制，让内容自然展开 */
+    gap: 10px;
+    overflow: visible; /* 确保按钮不被裁剪 */
   }
 
   .cover-container {
-    width: 160px;
-    height: 160px;
+    width: 120px;
+    height: 120px;
   }
 
-  .song-title {
-    font-size: 18px;
+  .cover-container::after {
+    width: 14px;
+    height: 14px;
+  }
+
+  .cover-container::before {
+    width: calc(100% + 14px);
+    height: calc(100% + 14px);
   }
 
   .song-info {
-    margin-top: 20px;
-  }
-
-  .player-right {
-    flex: 1;
-    min-height: 180px;
-  }
-
-  .progress-bar-container {
-    padding: 0 15px 15px;
-  }
-}
-
-@media (max-width: 480px) {
-  .player-left {
-    padding: 15px;
-  }
-
-  .cover-container {
-    width: 140px;
-    height: 140px;
+    margin-bottom: 0;
   }
 
   .song-title {
     font-size: 16px;
+    margin-bottom: 4px;
   }
 
   .song-artist {
     font-size: 13px;
+    margin-bottom: 2px;
   }
 
   .song-album {
     font-size: 12px;
   }
+
+  .player-right {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .progress-bar-container {
+    flex: none;
+    padding: 0 20px 10px;
+  }
 }
 
-/* 折叠屏适配 */
-@media (min-width: 768px) and (max-width: 1024px) and (min-height: 500px) and (max-height: 700px) {
+/* 小屏手机 */
+@media (max-width: 480px) {
   .player-left {
-    padding: 20px 10px;
+    padding: 12px 16px 6px;
+    gap: 10px;
   }
 
   .cover-container {
-    width: 160px;
-    height: 160px;
+    width: 110px;
+    height: 110px;
   }
 
-  .song-info {
-    margin-top: 15px;
+  .song-title {
+    font-size: 15px;
+    margin-bottom: 3px;
+  }
+
+  .song-artist {
+    font-size: 12px;
+    margin-bottom: 1px;
+  }
+
+  .song-album {
+    font-size: 11px;
+  }
+
+  .progress-bar-container {
+    padding: 0 16px 8px;
   }
 }
 </style>
