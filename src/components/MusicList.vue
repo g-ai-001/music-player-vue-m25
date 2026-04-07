@@ -262,15 +262,15 @@ onUpdated(async () => {
   margin-left: 10px;
 }
 
-/* 折叠屏和手机 - 无论横竖屏都使用上方列表样式 */
-@media (max-width: 1024px) {
+/* 手机竖屏 - 播放列表在上方 */
+@media (max-width: 768px) and (orientation: portrait) {
   .music-list {
     width: 100%;
     height: auto;
-    max-height: 30vh; /* 减小最大高度 */
+    max-height: 30vh;
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    flex-shrink: 0; /* 不允许缩小 */
+    flex-shrink: 0;
   }
 
   .list-title {
@@ -333,6 +333,226 @@ onUpdated(async () => {
   }
 }
 
+/* 手机横屏 - 播放列表隐藏（由 App.vue 控制 display: none）*/
+@media (max-width: 768px) and (orientation: landscape) {
+  .music-list {
+    display: none;
+  }
+}
+
+/* 折叠屏竖屏 - 播放列表在上方 */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: portrait) {
+  .music-list {
+    width: 100%;
+    height: auto;
+    max-height: 25vh;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+  }
+
+  .list-title {
+    padding: 14px 18px;
+    font-size: 16px;
+  }
+
+  .list-container {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 10px 12px;
+    gap: 12px;
+  }
+
+  .music-item {
+    flex-direction: column;
+    min-width: 120px;
+    max-width: 120px;
+    padding: 8px;
+  }
+
+  .music-cover {
+    width: 80px;
+    height: 80px;
+  }
+
+  .music-info {
+    margin-left: 0;
+    margin-top: 8px;
+    text-align: center;
+    width: 100%;
+    max-width: 100px;
+    overflow: hidden;
+  }
+
+  .music-title-wrapper {
+    width: 100%;
+    max-width: 100px;
+    overflow: hidden;
+  }
+
+  .music-title {
+    width: 100%;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .music-artist {
+    width: 100%;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .music-duration {
+    display: none;
+  }
+}
+
+/* 折叠屏横屏 - 播放列表在上方 */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape) {
+  .music-list {
+    width: 100%;
+    height: auto;
+    max-height: 25vh;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+  }
+
+  .list-title {
+    padding: 14px 18px;
+    font-size: 16px;
+  }
+
+  .list-container {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 10px 12px;
+    gap: 12px;
+  }
+
+  .music-item {
+    flex-direction: column;
+    min-width: 120px;
+    max-width: 120px;
+    padding: 8px;
+  }
+
+  .music-cover {
+    width: 80px;
+    height: 80px;
+  }
+
+  .music-info {
+    margin-left: 0;
+    margin-top: 8px;
+    text-align: center;
+    width: 100%;
+    max-width: 100px;
+    overflow: hidden;
+  }
+
+  .music-title-wrapper {
+    width: 100%;
+    max-width: 100px;
+    overflow: hidden;
+  }
+
+  .music-title {
+    width: 100%;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .music-artist {
+    width: 100%;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .music-duration {
+    display: none;
+  }
+}
+
+/* 平板竖屏 - 播放列表在上方 */
+@media (min-width: 1025px) and (max-width: 1366px) and (orientation: portrait) {
+  .music-list {
+    width: 100%;
+    height: auto;
+    max-height: 25vh;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+  }
+
+  .list-title {
+    padding: 16px 20px;
+    font-size: 17px;
+  }
+
+  .list-container {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 12px 15px;
+    gap: 12px;
+  }
+
+  .music-item {
+    flex-direction: column;
+    min-width: 130px;
+    max-width: 130px;
+    padding: 8px;
+  }
+
+  .music-cover {
+    width: 85px;
+    height: 85px;
+  }
+
+  .music-info {
+    margin-left: 0;
+    margin-top: 8px;
+    text-align: center;
+    width: 100%;
+    max-width: 110px;
+    overflow: hidden;
+  }
+
+  .music-title-wrapper {
+    width: 100%;
+    max-width: 110px;
+    overflow: hidden;
+  }
+
+  .music-title {
+    width: 100%;
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .music-artist {
+    width: 100%;
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .music-duration {
+    display: none;
+  }
+}
+
 /* 平板横屏 - 播放列表在左侧 */
 @media (min-width: 1025px) and (max-width: 1366px) and (orientation: landscape) {
   .music-list {
@@ -350,7 +570,7 @@ onUpdated(async () => {
 }
 
 /* 小屏手机 */
-@media (max-width: 480px) {
+@media (max-width: 480px) and (orientation: portrait) {
   .music-list {
     max-height: 40vh;
   }

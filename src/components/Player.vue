@@ -353,8 +353,8 @@ onMounted(() => {
   }
 }
 
-/* 折叠屏和手机 - 无论横竖屏都使用上下布局 */
-@media (max-width: 1024px) {
+/* 手机竖屏 - 上下布局,歌词在下方 */
+@media (max-width: 768px) and (orientation: portrait) {
   .player {
     height: 100%;
     display: flex;
@@ -374,14 +374,86 @@ onMounted(() => {
     min-width: unset;
     padding: 15px 20px 10px;
     flex: none;
-    max-height: none; /* 移除最大高度限制，让内容自然展开 */
+    max-height: none;
     gap: 10px;
-    overflow: visible; /* 确保按钮不被裁剪 */
+    overflow: visible;
   }
 
   .cover-container {
     width: 120px;
     height: 120px;
+  }
+
+  .cover-container::after {
+    width: 14px;
+    height: 14px;
+  }
+
+  .cover-container::before {
+    width: calc(100% + 14px);
+    height: calc(100% + 14px);
+  }
+
+  .song-info {
+    margin-bottom: 0;
+  }
+
+  .song-title {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+
+  .song-artist {
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+
+  .song-album {
+    font-size: 12px;
+  }
+
+  .player-right {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .progress-bar-container {
+    flex: none;
+    padding: 0 20px 10px;
+  }
+}
+
+/* 手机横屏 - 左右布局，播放器在左 */
+@media (max-width: 768px) and (orientation: landscape) {
+  .player {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .player-content {
+    flex: 1;
+    flex-direction: row;
+    min-height: 0;
+    display: flex;
+    overflow: hidden;
+  }
+
+  .player-left {
+    width: 50%;
+    min-width: 250px;
+    padding: 15px 20px 10px;
+    flex: none;
+    gap: 12px;
+    overflow: visible;
+    justify-content: center;
+  }
+
+  .cover-container {
+    width: 140px;
+    height: 140px;
   }
 
   .cover-container::after {
@@ -423,6 +495,267 @@ onMounted(() => {
   .progress-bar-container {
     flex: none;
     padding: 0 20px 10px;
+  }
+}
+
+/* 折叠屏竖屏 - 左右布局，播放器在左 */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: portrait) {
+  .player {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .player-content {
+    flex: 1;
+    flex-direction: row;
+    min-height: 0;
+    display: flex;
+    overflow: hidden;
+  }
+
+  .player-left {
+    width: 50%;
+    min-width: 280px;
+    padding: 20px;
+    flex: none;
+    gap: 15px;
+    overflow: visible;
+    justify-content: center;
+  }
+
+  .cover-container {
+    width: 160px;
+    height: 160px;
+  }
+
+  .cover-container::after {
+    width: 16px;
+    height: 16px;
+  }
+
+  .cover-container::before {
+    width: calc(100% + 16px);
+    height: calc(100% + 16px);
+  }
+
+  .song-info {
+    margin-bottom: 0;
+  }
+
+  .song-title {
+    font-size: 18px;
+    margin-bottom: 6px;
+  }
+
+  .song-artist {
+    font-size: 14px;
+    margin-bottom: 3px;
+  }
+
+  .song-album {
+    font-size: 12px;
+  }
+
+  .player-right {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .progress-bar-container {
+    flex: none;
+    padding: 0 20px 15px;
+  }
+}
+
+/* 折叠屏横屏 - 左右布局，播放器在左 */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape) {
+  .player {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .player-content {
+    flex: 1;
+    flex-direction: row;
+    min-height: 0;
+    display: flex;
+    overflow: hidden;
+  }
+
+  .player-left {
+    width: 50%;
+    min-width: 300px;
+    padding: 20px 25px 15px;
+    flex: none;
+    gap: 15px;
+    overflow: visible;
+    justify-content: center;
+  }
+
+  .cover-container {
+    width: 180px;
+    height: 180px;
+  }
+
+  .cover-container::after {
+    width: 16px;
+    height: 16px;
+  }
+
+  .cover-container::before {
+    width: calc(100% + 16px);
+    height: calc(100% + 16px);
+  }
+
+  .song-info {
+    margin-bottom: 0;
+  }
+
+  .song-title {
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+
+  .song-artist {
+    font-size: 14px;
+    margin-bottom: 3px;
+  }
+
+  .song-album {
+    font-size: 12px;
+  }
+
+  .player-right {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .progress-bar-container {
+    flex: none;
+    padding: 0 25px 15px;
+  }
+}
+
+/* 平板竖屏 - 左右布局，播放器在左 */
+@media (min-width: 1025px) and (max-width: 1366px) and (orientation: portrait) {
+  .player {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .player-content {
+    flex: 1;
+    flex-direction: row;
+    min-height: 0;
+    display: flex;
+    overflow: hidden;
+  }
+
+  .player-left {
+    width: 50%;
+    min-width: 320px;
+    padding: 25px;
+    flex: none;
+    gap: 18px;
+    overflow: visible;
+    justify-content: center;
+  }
+
+  .cover-container {
+    width: 190px;
+    height: 190px;
+  }
+
+  .cover-container::after {
+    width: 18px;
+    height: 18px;
+  }
+
+  .cover-container::before {
+    width: calc(100% + 18px);
+    height: calc(100% + 18px);
+  }
+
+  .song-info {
+    margin-bottom: 0;
+  }
+
+  .song-title {
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+
+  .song-artist {
+    font-size: 15px;
+    margin-bottom: 3px;
+  }
+
+  .song-album {
+    font-size: 13px;
+  }
+
+  .player-right {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .progress-bar-container {
+    flex: none;
+    padding: 0 25px 18px;
+  }
+}
+
+/* 平板横屏和桌面 - 左右布局，播放器在中 */
+@media (min-width: 1025px) and (max-width: 1366px) and (orientation: landscape),
+       (min-width: 1367px) {
+  .player {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .player-content {
+    flex: 1;
+    flex-direction: row;
+    min-height: 0;
+    display: flex;
+    overflow: hidden;
+  }
+
+  .player-left {
+    padding: 30px;
+    gap: 20px;
+    justify-content: center;
+  }
+
+  .cover-container {
+    width: 220px;
+    height: 220px;
+  }
+
+  .song-title {
+    font-size: 22px;
+  }
+
+  .player-right {
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .progress-bar-container {
+    padding: 0 30px 20px;
   }
 }
 

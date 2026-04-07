@@ -329,7 +329,8 @@ function resetManualScrollTimer() {
   font-size: 16px;
 }
 
-@media (max-width: 1024px) {
+/* 手机竖屏 - 歌词在下方 */
+@media (max-width: 768px) and (orientation: portrait) {
   .lyric-line {
     font-size: 17px;
     height: 50px;
@@ -338,14 +339,15 @@ function resetManualScrollTimer() {
 
   .lyric-line.active {
     font-size: 20px;
-    text-shadow: 
+    text-shadow:
       0 0 18px rgba(29, 185, 84, 0.6),
       0 0 36px rgba(29, 185, 84, 0.3),
       0 2px 8px rgba(0, 0, 0, 0.3);
   }
 }
 
-@media (max-width: 768px) {
+/* 手机横屏 - 歌词在右侧 */
+@media (max-width: 768px) and (orientation: landscape) {
   .lyric-line {
     font-size: 15px;
     height: 45px;
@@ -355,13 +357,83 @@ function resetManualScrollTimer() {
 
   .lyric-line.active {
     font-size: 18px;
-    text-shadow: 
+    text-shadow:
       0 0 15px rgba(29, 185, 84, 0.6),
       0 0 30px rgba(29, 185, 84, 0.3),
       0 2px 6px rgba(0, 0, 0, 0.3);
   }
 }
 
+/* 折叠屏竖屏 - 歌词在右侧 */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: portrait) {
+  .lyric-line {
+    font-size: 17px;
+    height: 50px;
+    line-height: 50px;
+  }
+
+  .lyric-line.active {
+    font-size: 20px;
+    text-shadow:
+      0 0 18px rgba(29, 185, 84, 0.6),
+      0 0 36px rgba(29, 185, 84, 0.3),
+      0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* 折叠屏横屏 - 歌词在右侧 */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape) {
+  .lyric-line {
+    font-size: 17px;
+    height: 50px;
+    line-height: 50px;
+  }
+
+  .lyric-line.active {
+    font-size: 20px;
+    text-shadow:
+      0 0 18px rgba(29, 185, 84, 0.6),
+      0 0 36px rgba(29, 185, 84, 0.3),
+      0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* 平板竖屏 - 歌词在右侧 */
+@media (min-width: 1025px) and (max-width: 1366px) and (orientation: portrait) {
+  .lyric-line {
+    font-size: 18px;
+    height: 52px;
+    line-height: 52px;
+  }
+
+  .lyric-line.active {
+    font-size: 21px;
+    text-shadow:
+      0 0 18px rgba(29, 185, 84, 0.6),
+      0 0 36px rgba(29, 185, 84, 0.3),
+      0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* 平板横屏和桌面 - 歌词在右侧 */
+@media (min-width: 1025px) and (max-width: 1366px) and (orientation: landscape),
+       (min-width: 1367px) {
+  .lyric-line {
+    font-size: 18px;
+    height: 55px;
+    line-height: 55px;
+  }
+
+  .lyric-line.active {
+    font-size: 22px;
+    text-shadow:
+      0 0 20px rgba(29, 185, 84, 0.6),
+      0 0 40px rgba(29, 185, 84, 0.3),
+      0 2px 10px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* 小屏手机 */
 @media (max-width: 480px) {
   .lyric-line {
     font-size: 14px;
@@ -371,7 +443,7 @@ function resetManualScrollTimer() {
 
   .lyric-line.active {
     font-size: 16px;
-    text-shadow: 
+    text-shadow:
       0 0 12px rgba(29, 185, 84, 0.6),
       0 0 24px rgba(29, 185, 84, 0.3),
       0 2px 5px rgba(0, 0, 0, 0.3);

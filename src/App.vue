@@ -2,19 +2,46 @@
   <div class="app" :style="backgroundStyle">
     <div class="background-overlay"></div>
     <div class="main-container">
-      <MusicList />
+      <MusicList v-if="showMusicList" />
       <Player />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { usePlayer } from './composables/usePlayer';
 import MusicList from './components/MusicList.vue';
 import Player from './components/Player.vue';
 
 const { currentMusic } = usePlayer();
+
+const windowHeight = ref(window.innerHeight);
+const windowWidth = ref(window.innerWidth);
+const isPortrait = ref(window.matchMedia('(orientation: portrait)').matches);
+
+const showMusicList = computed(() => {
+  // 播放列表在左侧时（横屏且宽度>1024px），始终显示
+  if (!isPortrait.value && windowWidth.value > 1024) {
+    return true;
+  }
+  // 播放列表在上方时，高度>=500才显示
+  return windowHeight.value >= 500;
+});
+
+function handleResize() {
+  windowHeight.value = window.innerHeight;
+  windowWidth.value = window.innerWidth;
+  isPortrait.value = window.matchMedia('(orientation: portrait)').matches;
+}
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
+});
 
 const backgroundStyle = computed(() => ({
   backgroundImage: `url(${currentMusic.value.cover})`
@@ -77,15 +104,8 @@ body {
   overflow: hidden;
 }
 
-/* 笔记本电脑适配 */
-@media (max-width: 1366px) and (max-height: 900px) {
-  .main-container {
-    height: 100%;
-  }
-}
-
-/* 手机设备 - 无论横竖屏播放列表都在上方 */
-@media (max-width: 768px) {
+/* 手机竖屏 (≤768px, portrait): 播放列表在上,播放器在中,歌词在下 */
+@media (max-width: 768px) and (orientation: portrait) {
   .main-container {
     flex-direction: column;
   }
@@ -96,8 +116,16 @@ body {
   }
 }
 
-/* 折叠屏设备 - 无论横竖屏播放列表都在上方 */
-@media (min-width: 768px) and (max-width: 1024px) {
+/* 手机横屏 (≤768px, landscape): 播放列表隐藏,播放器在左,歌词在右 */
+@media (max-width: 768px) and (orientation: landscape) {
+  .background-overlay {
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+  }
+}
+
+/* 折叠屏竖屏 (769px-1024px, portrait): 播放列表在上,播放器在左,歌词在右 */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: portrait) {
   .main-container {
     flex-direction: column;
   }
@@ -108,7 +136,19 @@ body {
   }
 }
 
-/* 平板设备 - 竖屏时播放列表在上方 */
+/* 折叠屏横屏 (769px-1024px, landscape): 播放列表在上,播放器在左,歌词在右 */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape) {
+  .main-container {
+    flex-direction: column;
+  }
+
+  .background-overlay {
+    backdrop-filter: blur(35px);
+    -webkit-backdrop-filter: blur(35px);
+  }
+}
+
+/* 平板竖屏 (1025px-1366px, portrait): 播放列表在上,播放器在左,歌词在右 */
 @media (min-width: 1025px) and (max-width: 1366px) and (orientation: portrait) {
   .main-container {
     flex-direction: column;
@@ -120,8 +160,9 @@ body {
   }
 }
 
-/* 平板/笔记本设备 - 横屏时播放列表在左侧 */
-@media (min-width: 1025px) and (orientation: landscape) {
+/* 平板横屏和桌面 (≥1025px landscape 或 >1366px): 播放列表在左,播放器在中,歌词在右 */
+@media (min-width: 1025px) and (max-width: 1366px) and (orientation: landscape),
+       (min-width: 1367px) {
   .background-overlay {
     backdrop-filter: blur(40px);
     -webkit-backdrop-filter: blur(40px);
