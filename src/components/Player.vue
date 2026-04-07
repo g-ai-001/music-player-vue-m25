@@ -57,7 +57,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { usePlayer } from '../composables/usePlayer';
 import Lyrics from './Lyrics.vue';
 import ProgressBar from './ProgressBar.vue';
@@ -80,45 +80,17 @@ const {
 
 const audioRef = ref<HTMLAudioElement | null>(null);
 const duration = ref(0);
-const needsAutoPlay = ref(true); // 是否需要自动播放
-
-// 使用AudioContext解锁音频播放
-function unlockAudio() {
-  try {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    if (audioContext.state === 'suspended') {
-      audioContext.resume();
-    }
-    // 创建一个短暂的音频来解锁
-    const buffer = audioContext.createBuffer(1, 1, 22050);
-    const source = audioContext.createBufferSource();
-    source.buffer = buffer;
-    source.connect(audioContext.destination);
-    source.start(0);
-  } catch (e) {
-    console.log('AudioContext unlock failed:', e);
-  }
-}
+const isAudioLoaded = ref(false);
 
 // 尝试自动播放
 async function attemptAutoPlay() {
-  if (!audioRef.value || !needsAutoPlay.value) return;
+  if (!audioRef.value || !isAudioLoaded.value) return;
 
   try {
-    // 先尝试解锁AudioContext
-    unlockAudio();
     await audioRef.value.play();
-    needsAutoPlay.value = false;
+    // 播放成功，isPlaying 状态会由 watch 自动更新
   } catch (error) {
-    // 自动播放被阻止，等待用户交互
     console.log('自动播放被阻止，等待用户交互');
-  }
-}
-
-// 用户首次交互时尝试播放
-function handleUserInteraction() {
-  if (needsAutoPlay.value) {
-    attemptAutoPlay();
   }
 }
 
@@ -131,6 +103,9 @@ function onTimeUpdate() {
 function onLoadedMetadata() {
   if (audioRef.value) {
     duration.value = audioRef.value.duration;
+    isAudioLoaded.value = true;
+    // 音频加载完成后尝试自动播放
+    attemptAutoPlay();
   }
 }
 
@@ -172,10 +147,10 @@ watch(isPlaying, (playing) => {
 watch(currentMusic, () => {
   if (audioRef.value) {
     audioRef.value.currentTime = 0;
-    duration.value = audioRef.value.duration || currentMusic.value.duration;
+    isAudioLoaded.value = false; // 重置状态，等待新的音频加载
   }
   // 切换歌曲后也需要自动播放
-  needsAutoPlay.value = true;
+  attemptAutoPlay();
 });
 
 watch(volume, (newVolume) => {
@@ -189,18 +164,6 @@ onMounted(() => {
     audioRef.value.volume = volume.value;
     duration.value = audioRef.value.duration || currentMusic.value.duration;
   }
-
-  // 添加用户交互监听器
-  document.addEventListener('click', handleUserInteraction);
-  document.addEventListener('touchstart', handleUserInteraction);
-
-  // 页面加载完成后尝试自动播放
-  attemptAutoPlay();
-});
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleUserInteraction);
-  document.removeEventListener('touchstart', handleUserInteraction);
 });
 </script>
 

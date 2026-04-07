@@ -290,6 +290,7 @@ onUpdated(async () => {
   .music-item {
     flex-direction: column;
     min-width: 110px;
+    max-width: 110px;
     padding: 6px;
   }
 
@@ -302,6 +303,29 @@ onUpdated(async () => {
     margin-left: 0;
     margin-top: 6px;
     text-align: center;
+    width: 100%;
+    max-width: 90px;
+    overflow: hidden;
+  }
+
+  .music-title-wrapper {
+    width: 100%;
+    max-width: 90px;
+    overflow: hidden;
+  }
+
+  .music-title {
+    width: 100%;
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .music-artist {
+    width: 100%;
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .music-duration {
@@ -333,11 +357,30 @@ onUpdated(async () => {
 
   .music-item {
     min-width: 100px;
+    max-width: 100px;
   }
 
   .music-cover {
     width: 60px;
     height: 60px;
+  }
+
+  .music-info {
+    max-width: 80px;
+  }
+
+  .music-title-wrapper {
+    max-width: 80px;
+  }
+
+  .music-title {
+    max-width: 80px;
+    font-size: 12px;
+  }
+
+  .music-artist {
+    max-width: 80px;
+    font-size: 11px;
   }
 }
 </style>
