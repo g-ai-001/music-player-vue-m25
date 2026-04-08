@@ -25,49 +25,58 @@ async function loadSongs() {
 
     const songs: Music[] = await response.json();
 
-    // 检查并处理封面和歌词路径
-    for (const song of songs) {
-      // 如果封面路径是相对路径，尝试加载，如果失败则使用备用封面
-      if (song.cover && song.cover.startsWith('./')) {
-        try {
-          const img = new Image();
-          await new Promise((resolve, reject) => {
-            img.onload = resolve;
-            img.onerror = reject;
-            img.src = song.cover;
-          });
-        } catch {
-          // 使用备用封面
-          song.cover = fallbackCovers[song.id] || fallbackCovers[1];
-        }
-      }
-
-      // 如果歌词路径是相对路径，尝试加载
-      if (song.lyrics && song.lyrics.startsWith('./')) {
-        try {
-          const response = await fetch(song.lyrics);
-          if (response.ok) {
-            song.lyrics = await response.text();
-          } else {
-            throw new Error('Lyrics file not found');
-          }
-        } catch {
-          // 使用内嵌的默认歌词（从defaultMusicList获取）
-          const defaultSong = defaultMusicList.find(s => s.id === song.id);
-          if (defaultSong) {
-            song.lyrics = defaultSong.lyrics;
-          }
-        }
-      }
-    }
-
+    // 立即赋值，不等待封面和歌词加载
     musicList.value = songs;
   } catch (error) {
     console.warn('Failed to load songs.json, using default songs:', error);
     musicList.value = defaultMusicList;
   } finally {
-    isLoading.value = false;
+    isLoading.value = false; // 立即解除 loading，让用户看到界面
   }
+
+  // 后台并行处理所有歌曲的封面和歌词，不阻塞 UI
+  if (musicList.value.length > 0) {
+    processSongsMetadata(musicList.value);
+  }
+}
+
+// 后台处理歌曲元数据（封面验证和歌词加载）
+async function processSongsMetadata(songs: Music[]) {
+  // 使用 Promise.allSettled 并行处理，单个失败不影响其他歌曲
+  await Promise.allSettled(songs.map(async (song) => {
+    // 封面检查（仅对相对路径）
+    if (song.cover && song.cover.startsWith('./')) {
+      try {
+        const img = new Image();
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+          img.src = song.cover;
+        });
+      } catch {
+        // 使用备用封面
+        song.cover = fallbackCovers[song.id] || fallbackCovers[1];
+      }
+    }
+
+    // 歌词加载
+    if (song.lyrics && song.lyrics.startsWith('./')) {
+      try {
+        const response = await fetch(song.lyrics);
+        if (response.ok) {
+          song.lyrics = await response.text();
+        } else {
+          throw new Error('Lyrics file not found');
+        }
+      } catch {
+        // 使用内嵌的默认歌词
+        const defaultSong = defaultMusicList.find(s => s.id === song.id);
+        if (defaultSong) {
+          song.lyrics = defaultSong.lyrics;
+        }
+      }
+    }
+  }));
 }
 
 const currentMusic = computed(() => musicList.value[currentMusicIndex.value] || defaultMusicList[0]);

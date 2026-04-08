@@ -10,7 +10,12 @@
         @click="handleSelect(index)"
       >
         <div class="music-cover">
-          <img :src="music.cover" :alt="music.title" />
+          <img 
+            :src="music.cover" 
+            :alt="music.title" 
+            loading="lazy"
+            @error="handleCoverError"
+          />
           <div v-if="index === currentMusicIndex && isPlaying" class="playing-indicator">
             <span></span>
             <span></span>
@@ -36,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, onMounted, onUpdated } from 'vue';
+import { ref, nextTick, onMounted } from 'vue';
 import { usePlayer } from '../composables/usePlayer';
 
 const { musicList, currentMusicIndex, isPlaying, formatTime, selectMusic } = usePlayer();
@@ -46,6 +51,14 @@ const scrollStates = ref<Map<number, boolean>>(new Map());
 
 function handleSelect(index: number) {
   selectMusic(index);
+}
+
+// 处理封面加载失败
+function handleCoverError(event: Event) {
+  const img = event.target as HTMLImageElement;
+  // 设置默认封面或隐藏元素
+  img.style.display = 'none';
+  console.warn('Failed to load cover image:', img.alt);
 }
 
 // 检测标题是否溢出
@@ -68,14 +81,6 @@ function shouldScroll(index: number): boolean {
 
 // 组件挂载后检测所有标题
 onMounted(async () => {
-  await nextTick();
-  for (let i = 0; i < musicList.value.length; i++) {
-    await checkOverflow(i);
-  }
-});
-
-// 更新后重新检测
-onUpdated(async () => {
   await nextTick();
   for (let i = 0; i < musicList.value.length; i++) {
     await checkOverflow(i);

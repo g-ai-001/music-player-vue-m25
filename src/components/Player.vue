@@ -11,6 +11,8 @@
       @timeupdate="onTimeUpdate"
       @ended="onEnded"
       @loadedmetadata="onLoadedMetadata"
+      @play="onPlay"
+      @pause="onPause"
     ></audio>
 
     <div class="player-content">
@@ -106,6 +108,20 @@ function onLoadedMetadata() {
     isAudioLoaded.value = true;
     // 音频加载完成后尝试自动播放
     attemptAutoPlay();
+  }
+}
+
+function onPlay() {
+  // 确保 isPlaying 状态与实际播放同步
+  if (!isPlaying.value) {
+    isPlaying.value = true;
+  }
+}
+
+function onPause() {
+  // 确保 isPlaying 状态与实际暂停同步
+  if (isPlaying.value) {
+    isPlaying.value = false;
   }
 }
 

@@ -1,6 +1,6 @@
 <template>
-  <div class="app" :style="backgroundStyle">
-    <div class="background-overlay"></div>
+  <div class="app">
+    <div class="background-overlay" :style="backgroundStyle"></div>
     <div class="main-container">
       <MusicList v-if="showMusicList" />
       <Player />
@@ -43,8 +43,9 @@ onUnmounted(() => {
   window.removeEventListener('resize', handleResize);
 });
 
+// 使用 CSS filter 模拟背景模糊效果，避免重复加载图片
 const backgroundStyle = computed(() => ({
-  backgroundImage: `url(${currentMusic.value.cover})`
+  backgroundImage: `url(${currentMusic.value.cover})`,
 }));
 </script>
 
@@ -72,9 +73,6 @@ body {
 .app {
   width: 100%;
   height: 100%;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
   position: relative;
   transition: background-image 0.5s ease;
 }
@@ -93,6 +91,12 @@ body {
   );
   backdrop-filter: blur(50px);
   -webkit-backdrop-filter: blur(50px);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(30px) brightness(0.7);
+  transform: scale(1.1); /* 避免模糊边缘 */
+  z-index: 0;
 }
 
 .main-container {
