@@ -45,7 +45,7 @@ async function processSongsMetadata(songs: Music[]) {
   // 使用 Promise.allSettled 并行处理，单个失败不影响其他歌曲
   await Promise.allSettled(songs.map(async (song) => {
     // 封面检查（仅对相对路径）
-    if (song.cover && song.cover.startsWith('./')) {
+    if (song.cover) {
       try {
         const img = new Image();
         await new Promise((resolve, reject) => {
@@ -60,7 +60,7 @@ async function processSongsMetadata(songs: Music[]) {
     }
 
     // 歌词加载
-    if (song.lyrics && song.lyrics.startsWith('./')) {
+    if (song.lyrics) {
       try {
         const response = await fetch(song.lyrics);
         if (response.ok) {
