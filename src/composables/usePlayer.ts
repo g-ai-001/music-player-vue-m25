@@ -17,8 +17,14 @@ const volume = ref(0.8);
 const playMode = ref<'loop' | 'single' | 'random'>('loop');
 const isLoading = ref(true);
 
-// 加载歌曲数据
+// 单例实例标记
+let isInitialized = false;
+
+// 加载歌曲数据（只执行一次）
 async function loadSongs() {
+  if (isInitialized) return; // 防止重复加载
+  isInitialized = true;
+
   try {
     const response = await fetch('./music/songs.json');
     if (!response.ok) throw new Error('Failed to load songs.json');
@@ -169,8 +175,8 @@ export function usePlayer() {
     playMode.value = modes[(currentIndex + 1) % modes.length];
   }
 
-  // 初始化时加载歌曲
-  loadSongs();
+  // 初始化时不再自动加载，由第一个调用用的组件触发
+  // loadSongs(); // 已移除，改为按需调用
 
   return {
     musicList,

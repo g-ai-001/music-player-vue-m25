@@ -14,7 +14,10 @@ import { usePlayer } from './composables/usePlayer';
 import MusicList from './components/MusicList.vue';
 import Player from './components/Player.vue';
 
-const { currentMusic } = usePlayer();
+const { currentMusic, loadSongs } = usePlayer();
+
+// 在应用启动时加载一次歌曲数据
+loadSongs();
 
 const windowHeight = ref(window.innerHeight);
 const windowWidth = ref(window.innerWidth);
